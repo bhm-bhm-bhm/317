@@ -889,38 +889,44 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // MAIN PROPERTY LIST (Section 3)
     // ==========================================
-    function renderMainPropertyList(regionKey, scrollTo = false) {
+    // State for property list expansion
+    let currentDisplayProps = [];
+    let currentRegionKey = 'seoul';
+    let isExpanded = false;
+
+    function renderMainPropertyList(regionKey, scrollTo = false, expanded = false) {
         const grid = document.getElementById('main-property-grid');
+        const loadMoreBtn = document.querySelector('.btn-load-more');
         const data = regionData[regionKey];
+        
         if(!grid || !data) return;
 
+        currentRegionKey = regionKey;
+        isExpanded = expanded;
         document.getElementById('selected-region-name').textContent = data.name;
 
-        // Show loading state briefly
-        grid.innerHTML = `
-            <div class="loading-state">
-                <i class="fas fa-spinner fa-spin"></i>
-                <p>매물을 불러오고 있습니다...</p>
-            </div>
-        `;
-
-        setTimeout(() => {
-            grid.innerHTML = '';
-            
-            // If no properties, show empty state
-            if(!data.properties || data.properties.length === 0) {
-                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 60px; color: #666;">해당 지역에 등록된 추천 매물이 없습니다.</div>';
+        // If not expanded, show only first 4. If expanded, or if global search results, show all.
+        // For search results (handled in handleHeroSearch), we'll handle separately or unify.
+        
+        // Let's unify with a helper
+        const renderCards = (props, targetGrid) => {
+            targetGrid.innerHTML = '';
+            if(!props || props.length === 0) {
+                targetGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 60px; color: #666;">해당 지역에 등록된 추천 매물이 없습니다.</div>';
+                if(loadMoreBtn) loadMoreBtn.style.display = 'none';
                 return;
             }
 
-            data.properties.forEach((prop, idx) => {
+            const visibleProps = isExpanded ? props : props.slice(0, 4);
+            
+            visibleProps.forEach((prop, idx) => {
                 const card = document.createElement('div');
-                card.className = 'all-prop-card'; // Reuse style
-                card.onclick = () => openPropertyModal(regionKey, idx);
+                card.className = 'all-prop-card fade-in';
+                card.onclick = () => openPropertyModal(prop.regionKey || regionKey, prop.propIndex !== undefined ? prop.propIndex : idx);
                 card.innerHTML = `
                     <div class="all-prop-img-wrap">
                         <img src="${prop.img.replace('w=100&h=100', 'w=400&h=300')}" alt="${prop.name}" class="all-prop-img">
-                        <span class="mock-tag">HOT</span>
+                        <span class="mock-tag">${prop.status === '청약중' ? 'URGENT' : 'HOT'}</span>
                     </div>
                     <div class="all-prop-body">
                         <span class="all-prop-badge">${prop.category}</span>
@@ -932,17 +938,66 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                 `;
-                grid.appendChild(card);
+                targetGrid.appendChild(card);
             });
 
-            if(scrollTo) {
-                window.scrollTo({
-                    top: document.getElementById('property-list-section').offsetTop - 100,
-                    behavior: 'smooth'
-                });
+            // Update Load More Button
+            if(loadMoreBtn) {
+                if(props.length <= 4) {
+                    loadMoreBtn.style.display = 'none';
+                } else {
+                    loadMoreBtn.style.display = 'inline-block';
+                    loadMoreBtn.innerHTML = isExpanded ? 
+                        '매물 리스트 접기 <i class="fas fa-chevron-up"></i>' : 
+                        `전체 매물 더보기 (${props.length - 4}개 더 있음) <i class="fas fa-chevron-down"></i>`;
+                }
             }
-        }, 600);
+        };
+
+        if(!expanded) {
+            grid.innerHTML = `
+                <div class="loading-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>매물을 불러오고 있습니다...</p>
+                </div>
+            `;
+            setTimeout(() => {
+                renderCards(data.properties, grid);
+                if(scrollTo) {
+                    window.scrollTo({
+                        top: document.getElementById('property-list-section').offsetTop - 100,
+                        behavior: 'smooth'
+                    });
+                }
+            }, 600);
+        } else {
+            renderCards(data.properties, grid);
+        }
     }
+
+    window.togglePropertyExpansion = function() {
+        isExpanded = !isExpanded;
+        const grid = document.getElementById('main-property-grid');
+        const queryTitle = document.getElementById('selected-region-name').textContent;
+        
+        // If it's a search result, we might need different logic. 
+        // For simplicity, let's assume we are toggling the currentRegionKey's properties if not in search mode.
+        if (queryTitle.includes('검색 결과')) {
+            // Re-run search logic with expansion? 
+            // Or just keep the current behavior for search results (show all).
+            // Let's just focus on the region selection for now.
+            renderMainPropertyList(currentRegionKey, false, isExpanded);
+        } else {
+            renderMainPropertyList(currentRegionKey, false, isExpanded);
+        }
+
+        if(!isExpanded) {
+            window.scrollTo({
+                top: document.getElementById('property-list-section').offsetTop - 100,
+                behavior: 'smooth'
+            });
+        }
+    };
 
     // Init
     renderCalendarUI();
