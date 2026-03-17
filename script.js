@@ -167,7 +167,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const mapContainer = document.getElementById('korea-map');
     if (mapContainer && typeof L !== 'undefined') {
         map = L.map('korea-map', { center:[36.0,127.8], zoom:7, minZoom:6, maxZoom:14, attributionControl:false });
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+        const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Add CSS filter to the tile layer container for dark mode
+        osmLayer.getContainer().style.filter = 'invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%)';
         Object.entries(regionData).forEach(([key, data]) => {
             const icon = L.divIcon({
                 className:'custom-marker',
