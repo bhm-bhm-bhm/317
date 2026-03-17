@@ -68,6 +68,20 @@
                 <p class="hero-subtitle">전국 아파트, 오피스텔, 상가까지 실시간 분양 정보를 가장 빠르고 정확하게 전달합니다.</p>
             </div>
 
+            <!-- New: Hero Search Bar -->
+            <div class="hero-search-wrapper fade-up-2">
+                <div class="hero-search-bar">
+                    <div class="search-input-group">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="hero-search-input" placeholder="지역 또는 단지명을 입력하세요">
+                    </div>
+                    <button class="hero-search-btn">검색하기</button>
+                </div>
+                <div class="hero-ctas">
+                    <button class="btn-hero-primary" onclick="window.scrollTo({top: document.getElementById('property-list-section').offsetTop - 80, behavior: 'smooth'})">지금 분양 현장 보기</button>
+                    <button class="btn-hero-secondary" onclick="openConsultModal('chat')">내게 맞는 매물 찾기</button>
+                </div>
+            </div>
 
             <div class="fade-up-2">
                 <div class="hero-expert-grid">
@@ -109,14 +123,14 @@
 
             <div class="stats-container fade-up-3">
                 <div class="stat-item">
-                    <h3 class="counter" data-target="15420">0</h3>
+                    <h3 class="counter" data-target="15420">15,420+</h3>
                     <p>누적 분양 정보</p>
                 </div>
                 <div class="stat-item">
                     <div class="stat-divider"></div>
                 </div>
                 <div class="stat-item">
-                    <h3 class="counter" data-target="385">0</h3>
+                    <h3 class="counter" data-target="385">385</h3>
                     <p>진행중인 현장</p>
                 </div>
             </div>
@@ -512,6 +526,30 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Real-time Property List (New) -->
+    <section class="property-list-section" id="property-list-section">
+        <div class="section-container">
+            <div class="section-header">
+                <div class="header-left">
+                    <span class="section-badge"><i class="fas fa-list"></i> 매물 리스트</span>
+                    <h2 class="section-title"><span id="selected-region-name">전국</span> <span class="highlight">추천 매물</span></h2>
+                </div>
+            </div>
+            
+            <div class="property-list-grid" id="main-property-grid">
+                <!-- Dynamically populated from JS -->
+                <div class="loading-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>매물을 불러오고 있습니다...</p>
+                </div>
+            </div>
+            
+            <div class="list-load-more">
+                <button class="btn-load-more" onclick="openAllPropertiesModal()">전체 매물 더보기 <i class="fas fa-plus"></i></button>
             </div>
         </div>
     </section>

@@ -14,6 +14,106 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Hero Search Bar Logic
+    const heroSearchInput = document.getElementById('hero-search-input');
+    const heroSearchBtn = document.querySelector('.hero-search-btn');
+    
+    const handleHeroSearch = () => {
+        const query = heroSearchInput.value.trim().toLowerCase();
+        if(!query) {
+            showToast('검색어를 입력해주세요.');
+            return;
+        }
+        
+        showToast(`'${query}' 검색 결과를 불러옵니다...`);
+        
+        const grid = document.getElementById('main-property-grid');
+        if(!grid) return;
+
+        // Display Loading
+        grid.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>검색 결과를 불러오고 있습니다...</p>
+            </div>
+        `;
+
+        // Scroll to results
+        window.scrollTo({
+            top: document.getElementById('property-list-section').offsetTop - 80,
+            behavior: 'smooth'
+        });
+
+        setTimeout(() => {
+            let searchResults = [];
+            
+            // Search across all regions and properties
+            Object.entries(regionData).forEach(([regionKey, data]) => {
+                const regionName = data.name.toLowerCase();
+                
+                // If region name matches, add all properties from that region
+                if (regionName.includes(query)) {
+                    data.properties.forEach((prop, idx) => {
+                        searchResults.push({ ...prop, regionKey, propIndex: idx });
+                    });
+                } else {
+                    // Otherwise, check individual properties
+                    data.properties.forEach((prop, idx) => {
+                        if (
+                            prop.name.toLowerCase().includes(query) ||
+                            prop.category.toLowerCase().includes(query) ||
+                            prop.area.toLowerCase().includes(query) ||
+                            (prop.brand && prop.brand.toLowerCase().includes(query))
+                        ) {
+                            searchResults.push({ ...prop, regionKey, propIndex: idx });
+                        }
+                    });
+                }
+            });
+
+            grid.innerHTML = '';
+            document.getElementById('selected-region-name').textContent = `"${query}" 검색 결과`;
+
+            if (searchResults.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 100px 20px;">
+                        <i class="fas fa-search-minus" style="font-size: 40px; color: #444; margin-bottom: 20px;"></i>
+                        <p style="color: #888; font-size: 16px;">'${query}'에 대한 검색 결과가 없습니다.</p>
+                        <p style="color: #666; font-size: 14px; margin-top: 10px;">다른 키워드로 검색하거나 지도에서 지역을 선택해보세요.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            searchResults.forEach((prop) => {
+                const card = document.createElement('div');
+                card.className = 'all-prop-card';
+                card.onclick = () => openPropertyModal(prop.regionKey, prop.propIndex);
+                card.innerHTML = `
+                    <div class="all-prop-img-wrap">
+                        <img src="${prop.img.replace('w=100&h=100', 'w=400&h=300')}" alt="${prop.name}" class="all-prop-img">
+                        <span class="mock-tag">MATCH</span>
+                    </div>
+                    <div class="all-prop-body">
+                        <span class="all-prop-badge">${prop.category}</span>
+                        <h4 class="all-prop-title">${prop.name}</h4>
+                        <p class="all-prop-loc"><i class="fas fa-map-marker-alt"></i> ${prop.area}</p>
+                        <div class="all-prop-price-row">
+                            <span class="all-prop-price">${prop.price}</span>
+                            <span class="all-prop-more">상세보기 <i class="fas fa-chevron-right"></i></span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }, 800);
+    };
+
+    heroSearchBtn?.addEventListener('click', handleHeroSearch);
+    heroSearchInput?.addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') handleHeroSearch();
+    });
+
     // Counter Animation
     const counters = document.querySelectorAll('.counter');
     const animateCounters = () => {
@@ -76,7 +176,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const marker = L.marker([data.lat, data.lng], { icon }).addTo(map);
             marker.bindPopup(`<div style="font-family:'Pretendard',sans-serif;padding:4px;"><strong style="font-size:15px;">${data.name}</strong><div style="margin-top:8px;display:flex;gap:16px;"><div><div style="font-size:10px;color:#9ba1a6;">분양</div><div style="font-size:14px;font-weight:700;">${data.count}</div></div><div><div style="font-size:10px;color:#9ba1a6;">평균</div><div style="font-size:14px;font-weight:700;">${data.avg}</div></div><div><div style="font-size:10px;color:#9ba1a6;">변동</div><div style="font-size:14px;font-weight:700;color:${data.trendDir==='up'?'#2ecc71':'#e74c3c'};">${data.trend}</div></div></div></div>`, {maxWidth:300});
-            marker.on('click', () => showInfoPopup(key));
+            marker.on('click', () => {
+                showInfoPopup(key);
+                renderMainPropertyList(key, true); // Sync with property list
+            });
         });
     }
 
@@ -111,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.region-card').forEach(c => c.classList.remove('active'));
             card.classList.add('active');
             showInfoPopup(region);
+            renderMainPropertyList(region, true); // Sync with property list
         });
     });
 
@@ -782,8 +886,67 @@ document.addEventListener('DOMContentLoaded', () => {
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     });
 
+    // ==========================================
+    // MAIN PROPERTY LIST (Section 3)
+    // ==========================================
+    function renderMainPropertyList(regionKey, scrollTo = false) {
+        const grid = document.getElementById('main-property-grid');
+        const data = regionData[regionKey];
+        if(!grid || !data) return;
+
+        document.getElementById('selected-region-name').textContent = data.name;
+
+        // Show loading state briefly
+        grid.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>매물을 불러오고 있습니다...</p>
+            </div>
+        `;
+
+        setTimeout(() => {
+            grid.innerHTML = '';
+            
+            // If no properties, show empty state
+            if(!data.properties || data.properties.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 60px; color: #666;">해당 지역에 등록된 추천 매물이 없습니다.</div>';
+                return;
+            }
+
+            data.properties.forEach((prop, idx) => {
+                const card = document.createElement('div');
+                card.className = 'all-prop-card'; // Reuse style
+                card.onclick = () => openPropertyModal(regionKey, idx);
+                card.innerHTML = `
+                    <div class="all-prop-img-wrap">
+                        <img src="${prop.img.replace('w=100&h=100', 'w=400&h=300')}" alt="${prop.name}" class="all-prop-img">
+                        <span class="mock-tag">HOT</span>
+                    </div>
+                    <div class="all-prop-body">
+                        <span class="all-prop-badge">${prop.category}</span>
+                        <h4 class="all-prop-title">${prop.name}</h4>
+                        <p class="all-prop-loc"><i class="fas fa-map-marker-alt"></i> ${prop.area}</p>
+                        <div class="all-prop-price-row">
+                            <span class="all-prop-price">${prop.price}</span>
+                            <span class="all-prop-more">상세보기 <i class="fas fa-chevron-right"></i></span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            if(scrollTo) {
+                window.scrollTo({
+                    top: document.getElementById('property-list-section').offsetTop - 100,
+                    behavior: 'smooth'
+                });
+            }
+        }, 600);
+    }
+
     // Init
     renderCalendarUI();
     renderCalendarEvents();
     updateNavBadges();
+    renderMainPropertyList('seoul'); // Initial load
 });

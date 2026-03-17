@@ -740,6 +740,121 @@ button {
     100% { transform: translateY(15px); opacity: 0; }
 }
 
+/* New: Hero Search Wrapper & Components */
+.hero-search-wrapper {
+    width: 100%;
+    max-width: 900px;
+    margin: 40px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+}
+
+.hero-search-bar {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50px;
+    padding: 8px 8px 8px 30px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.3);
+}
+
+.hero-search-bar .search-input-group {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    height: 100%;
+}
+
+.hero-search-bar .search-input-group i {
+    color: var(--color-primary-light);
+    font-size: 18px;
+}
+
+.hero-search-bar input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+    outline: none;
+    padding: 0;
+    margin: 0;
+    line-height: normal;
+    display: flex;
+    align-items: center;
+}
+
+.hero-search-bar input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.hero-search-btn {
+    padding: 14px 30px;
+    background: var(--color-primary);
+    color: #fff;
+    border-radius: 40px;
+    font-weight: 700;
+    font-size: 15px;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.hero-search-btn:hover {
+    background: var(--color-primary-light);
+    transform: scale(1.05);
+}
+
+.hero-ctas {
+    display: flex;
+    gap: 15px;
+}
+
+.btn-hero-primary {
+    padding: 16px 32px;
+    background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+    color: #fff;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 16px;
+    transition: var(--transition-smooth);
+    box-shadow: 0 10px 25px rgba(168, 126, 85, 0.3);
+}
+
+.btn-hero-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(168, 126, 85, 0.4);
+}
+
+.btn-hero-secondary {
+    padding: 16px 32px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 16px;
+    transition: var(--transition-smooth);
+    backdrop-filter: blur(10px);
+}
+
+.btn-hero-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
 /* ==========================================
    SECTION 2: Map-Based Search & Filters
    ========================================== */
@@ -2612,5 +2727,127 @@ button {
     .side-panel { width:100%; }
     .share-options { grid-template-columns: repeat(2,1fr); }
     .fab-container { bottom:20px; right:20px; }
+
+    /* New: Property list grid mobile */
+    .property-list-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .guide-grid {
+        display: flex;
+        overflow-x: auto;
+        padding-bottom: 20px;
+        gap: 20px;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+    }
+    
+    .guide-grid::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .guide-card {
+        flex: 0 0 85%;
+        scroll-snap-align: center;
+    }
+    
+    .hero-search-bar {
+        padding: 5px 5px 5px 20px;
+    }
+    
+    .hero-search-btn {
+        padding: 10px 20px;
+        font-size: 13px;
+    }
+    
+    .hero-ctas {
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+    }
+    
+    .hero-ctas button {
+        width: 100%;
+    }
+
+    /* Expert Grid Slider */
+    .hero-expert-grid {
+        display: flex !important;
+        overflow-x: auto;
+        padding-bottom: 10px;
+        gap: 12px;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+        width: 100vw;
+        margin-left: -20px;
+        padding: 0 20px 15px;
+    }
+
+    .hero-expert-grid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .expert-card-mini {
+        flex: 0 0 160px;
+        scroll-snap-align: center;
+    }
+}
+
+/* New: Property List Section Styles */
+.property-list-section {
+    padding: 100px 0;
+    background: rgba(255, 255, 255, 0.01);
+}
+
+.property-list-section .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    text-align: left;
+    margin-bottom: 50px;
+}
+
+.header-left .section-title {
+    margin-bottom: 0;
+}
+
+
+.property-list-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+.loading-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 100px 0;
+    color: var(--color-text-muted);
+}
+
+.loading-state i {
+    font-size: 30px;
+    margin-bottom: 15px;
+    color: var(--color-primary);
+}
+
+.list-load-more {
+    margin-top: 60px;
+    text-align: center;
+}
+
+.btn-load-more {
+    padding: 14px 40px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    color: #fff;
+    font-weight: 600;
+    transition: var(--transition-smooth);
+}
+
+.btn-load-more:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--color-primary);
 }
 
