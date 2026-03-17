@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공 간 - 전국 실시간 분양 정보</title>
+    <meta name="description" content="전국 8도 아파트, 오피스텔, 상가 분양 정보를 가장 빠르게 만나보세요.">
+    <link rel="stylesheet" href="style.css">
+    <!-- Pretendard Font -->
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+
+<body>
+    <!-- Glass Graphic Background Orbs -->
+    <div class="glass-bg-wrapper" aria-hidden="true">
+        <div class="glass-orb orb-1"></div>
+        <div class="glass-orb orb-2"></div>
+        <div class="glass-orb orb-3"></div>
+        <div class="glass-orb orb-4"></div>
+        <div class="glass-orb orb-5"></div>
+        <div class="glass-mesh"></div>
+        <div class="glass-noise"></div>
+    </div>
+
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">공<span>간</span></a>
+            <div class="nav-center">
+                <div class="nav-links">
+                    <a href="#" class="active">전국 분양</a>
+                    <a href="#" id="nav-about">회사 소개</a>
+                    <a href="#guide-section">분양 가이드</a>
+                </div>
+                <div class="nav-icons">
+                    <button class="nav-icon-btn" id="nav-calendar" title="내 캘린더">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span class="nav-badge" id="nav-calendar-badge">0</span>
+                    </button>
+                </div>
+            </div>
+            <div class="nav-actions">
+                <button class="btn-contact">분양 광고 문의</button>
+            </div>
+            <button class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <main class="hero">
+        <div class="hero-bg">
+            <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80"
+                alt="Real Estate Background">
+            <div class="overlay"></div>
+            <div class="grid-overlay"></div>
+        </div>
+
+        <div class="hero-content">
+            <div class="fade-up-1">
+                <span class="badge"><i class="fas fa-check-circle"></i> 2026 대한민국 1등 분양 플랫폼</span>
+                <h1 class="hero-title">내 집 마련의 꿈,<br><span class="highlight">현명한 선택</span>에서 시작됩니다</h1>
+                <p class="hero-subtitle">전국 아파트, 오피스텔, 상가까지 실시간 분양 정보를 가장 빠르고 정확하게 전달합니다.</p>
+            </div>
+
+
+            <div class="fade-up-2">
+                <div class="hero-expert-grid">
+                    <div class="expert-card-mini">
+                        <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop"
+                            alt="김민준">
+                        <div class="expert-mini-info">
+                            <h5>김민준</h5>
+                            <span>부동산 분석</span>
+                        </div>
+                    </div>
+                    <div class="expert-card-mini">
+                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop"
+                            alt="이지원">
+                        <div class="expert-mini-info">
+                            <h5>이지원</h5>
+                            <span>세무/법률</span>
+                        </div>
+                    </div>
+                    <div class="expert-card-mini">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop"
+                            alt="박서준">
+                        <div class="expert-mini-info">
+                            <h5>박서준</h5>
+                            <span>금융 솔루션</span>
+                        </div>
+                    </div>
+                    <div class="expert-card-mini">
+                        <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop"
+                            alt="정아름">
+                        <div class="expert-mini-info">
+                            <h5>정아름</h5>
+                            <span>인테리어</span>
+                        </div>
+                    </div>
+                </div>
+                <p class="expert-cta-text">분양 전문가 그룹이 고객님의 자산을 직접 관리합니다.</p>
+            </div>
+
+            <div class="stats-container fade-up-3">
+                <div class="stat-item">
+                    <h3 class="counter" data-target="15420">0</h3>
+                    <p>누적 분양 정보</p>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-divider"></div>
+                </div>
+                <div class="stat-item">
+                    <h3 class="counter" data-target="385">0</h3>
+                    <p>진행중인 현장</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="scroll-indicator fade-up-4">
+            <span class="mouse">
+                <span class="wheel"></span>
+            </span>
+            <p>Scroll to explore</p>
+        </div>
+    </main>
+
+    <!-- Section 2: Map-Based Search & Detailed Filter -->
+    <section class="map-section" id="map-section">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-map-marked-alt"></i> 지도 기반 검색</span>
+                <h2 class="section-title">전국 분양 현장을<br><span class="highlight">지도에서 한눈에</span> 확인하세요</h2>
+                <p class="section-desc">지역을 클릭하면 해당 지역의 분양 매물과 주변 시세를 시각적으로 확인할 수 있습니다.</p>
+            </div>
+
+            <div class="map-filter-layout">
+                <!-- Left: Interactive Map -->
+                <div class="map-panel">
+                    <div class="map-toolbar">
+                        <div class="map-view-tabs">
+                            <button class="map-tab active" data-view="map"><i class="fas fa-map"></i> 지도뷰</button>
+                            <button class="map-tab" data-view="region"><i class="fas fa-th-large"></i> 지역뷰</button>
+                        </div>
+                        <div class="map-legend">
+                            <span class="legend-item"><span class="dot dot-high"></span>10억 이상</span>
+                            <span class="legend-item"><span class="dot dot-mid"></span>5~10억</span>
+                            <span class="legend-item"><span class="dot dot-low"></span>5억 미만</span>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Map View -->
+                    <div class="map-container" id="map-view">
+                        <div id="korea-map" class="korea-map-interactive">
+                            <div class="map-loading">지도를 불러오는 중입니다...</div>
+                        </div>
+                    </div>
+
+                    <!-- Region Grid View (Enhanced) -->
+                    <div class="region-grid-container" id="region-view" style="display:none;">
+                        <div class="region-grid">
+                            <button class="region-card active" data-region="seoul">
+                                <div class="region-bar high"></div>
+                                <div class="region-card-body">
+                                    <div class="region-icon lg"><i class="fas fa-city"></i></div>
+                                    <h4>서울</h4>
+                                    <p class="region-count">127건</p>
+                                    <span class="region-avg">평균 <strong>12.5억</strong></span>
+                                    <span class="region-trend up"><i class="fas fa-arrow-up"></i> +2.3%</span>
+                                </div>
+                            </button>
+                            <button class="region-card" data-region="gyeonggi">
+                                <div class="region-bar mid"></div>
+                                <div class="region-card-body">
+                                    <div class="region-icon lg"><i class="fas fa-building"></i></div>
+                                    <h4>경기</h4>
+                                    <p class="region-count">98건</p>
+                                    <span class="region-avg">평균 <strong>7.2억</strong></span>
+                                    <span class="region-trend up"><i class="fas fa-arrow-up"></i> +1.8%</span>
+                                </div>
+                            </button>
+                            <button class="region-card" data-region="incheon">
+                                <div class="region-bar mid"></div>
+                                <div class="region-card-body">
+                                    <div class="region-icon lg"><i class="fas fa-ship"></i></div>
+                                    <h4>인천</h4>
+                                    <p class="region-count">45건</p>
+                                    <span class="region-avg">평균 <strong>5.8억</strong></span>
+                                    <span class="region-trend up"><i class="fas fa-arrow-up"></i> +0.9%</span>
+                                </div>
+                            </button>
+                            <button class="region-card" data-region="busan">
+                                <div class="region-bar mid"></div>
+                                <div class="region-card-body">
+                                    <div class="region-icon lg"><i class="fas fa-water"></i></div>
+                                    <h4>부산</h4>
+                                    <p class="region-count">38건</p>
+                                    <span class="region-avg">평균 <strong>6.1억</strong></span>
+                                    <span class="region-trend up"><i class="fas fa-arrow-up"></i> +1.2%</span>
+                                </div>
+                            </button>
+                            <button class="region-card" data-region="daegu">
+                                <div class="region-bar low"></div>
+                                <div class="region-card-body">
+                                    <div class="region-icon lg"><i class="fas fa-mountain"></i></div>
+                                    <h4>대구</h4>
+                                    <p class="region-count">22건</p>
+                                    <span class="region-avg">평균 <strong>4.8억</strong></span>
+                                    <span class="region-trend down"><i class="fas fa-arrow-down"></i> -0.5%</span>
+                                </div>
+                            </button>
+                            <button class="region-card" data-region="daejeon">
+                                <div class="region-bar low"></div>
+                                <div class="region-card-body">
+                                    <div class="region-icon lg"><i class="fas fa-landmark"></i></div>
+                                    <h4>대전</h4>
+                                    <p class="region-count">18건</p>
+                                    <span class="region-avg">평균 <strong>4.2억</strong></span>
+                                    <span class="region-trend up"><i class="fas fa-arrow-up"></i> +0.7%</span>
+                                </div>
+                            </button>
+                            <button class="region-card" data-region="gwangju">
+                                <div class="region-bar low"></div>
+                                <div class="region-card-body">
+                                    <div class="region-icon lg"><i class="fas fa-sun"></i></div>
+                                    <h4>광주</h4>
+                                    <p class="region-count">15건</p>
+                                    <span class="region-avg">평균 <strong>3.9억</strong></span>
+                                    <span class="region-trend up"><i class="fas fa-arrow-up"></i> +0.3%</span>
+                                </div>
+                            </button>
+                            <button class="region-card" data-region="ulsan">
+                                <div class="region-bar low"></div>
+                                <div class="region-card-body">
+                                    <div class="region-icon lg"><i class="fas fa-industry"></i></div>
+                                    <h4>울산</h4>
+                                    <p class="region-count">12건</p>
+                                    <span class="region-avg">평균 <strong>4.5억</strong></span>
+                                    <span class="region-trend down"><i class="fas fa-arrow-down"></i> -0.2%</span>
+                                </div>
+                            </button>
+                            <button class="region-card" data-region="sejong">
+                                <div class="region-bar mid"></div>
+                                <div class="region-card-body">
+                                    <div class="region-icon lg"><i class="fas fa-flag"></i></div>
+                                    <h4>세종</h4>
+                                    <p class="region-count">10건</p>
+                                    <span class="region-avg">평균 <strong>5.1억</strong></span>
+                                    <span class="region-trend up"><i class="fas fa-arrow-up"></i> +1.5%</span>
+                                </div>
+                            </button>
+                            <button class="region-card" data-region="gangwon">
+                                <div class="region-bar low"></div>
+                                <div class="region-card-body">
+                                    <div class="region-icon lg"><i class="fas fa-tree"></i></div>
+                                    <h4>강원</h4>
+                                    <p class="region-count">8건</p>
+                                    <span class="region-avg">평균 <strong>3.2억</strong></span>
+                                    <span class="region-trend up"><i class="fas fa-arrow-up"></i> +0.4%</span>
+                                </div>
+                            </button>
+                            <button class="region-card" data-region="chungbuk">
+                                <div class="region-bar low"></div>
+                                <div class="region-card-body">
+                                    <div class="region-icon lg"><i class="fas fa-leaf"></i></div>
+                                    <h4>충북</h4>
+                                    <p class="region-count">14건</p>
+                                    <span class="region-avg">평균 <strong>3.5억</strong></span>
+                                    <span class="region-trend up"><i class="fas fa-arrow-up"></i> +0.6%</span>
+                                </div>
+                            </button>
+                            <button class="region-card" data-region="chungnam">
+                                <div class="region-bar low"></div>
+                                <div class="region-card-body">
+                                    <div class="region-icon lg"><i class="fas fa-seedling"></i></div>
+                                    <h4>충남</h4>
+                                    <p class="region-count">16건</p>
+                                    <span class="region-avg">평균 <strong>3.8억</strong></span>
+                                    <span class="region-trend up"><i class="fas fa-arrow-up"></i> +0.8%</span>
+                                </div>
+                            </button>
+                            <button class="region-card" data-region="jeonbuk">
+                                <div class="region-bar low"></div>
+                                <div class="region-card-body">
+                                    <div class="region-icon lg"><i class="fas fa-wind"></i></div>
+                                    <h4>전북</h4>
+                                    <p class="region-count">11건</p>
+                                    <span class="region-avg">평균 <strong>2.9억</strong></span>
+                                    <span class="region-trend down"><i class="fas fa-arrow-down"></i> -0.1%</span>
+                                </div>
+                            </button>
+                            <button class="region-card" data-region="jeonnam">
+                                <div class="region-bar low"></div>
+                                <div class="region-card-body">
+                                    <div class="region-icon lg"><i class="fas fa-fish"></i></div>
+                                    <h4>전남</h4>
+                                    <p class="region-count">9건</p>
+                                    <span class="region-avg">평균 <strong>2.7억</strong></span>
+                                    <span class="region-trend up"><i class="fas fa-arrow-up"></i> +0.2%</span>
+                                </div>
+                            </button>
+                            <button class="region-card" data-region="gyeongbuk">
+                                <div class="region-bar low"></div>
+                                <div class="region-card-body">
+                                    <div class="region-icon lg"><i class="fas fa-torii-gate"></i></div>
+                                    <h4>경북</h4>
+                                    <p class="region-count">13건</p>
+                                    <span class="region-avg">평균 <strong>3.4억</strong></span>
+                                    <span class="region-trend up"><i class="fas fa-arrow-up"></i> +0.3%</span>
+                                </div>
+                            </button>
+                            <button class="region-card" data-region="gyeongnam">
+                                <div class="region-bar low"></div>
+                                <div class="region-card-body">
+                                    <div class="region-icon lg"><i class="fas fa-anchor"></i></div>
+                                    <h4>경남</h4>
+                                    <p class="region-count">17건</p>
+                                    <span class="region-avg">평균 <strong>3.6억</strong></span>
+                                    <span class="region-trend up"><i class="fas fa-arrow-up"></i> +0.5%</span>
+                                </div>
+                            </button>
+                            <button class="region-card" data-region="jeju">
+                                <div class="region-bar mid"></div>
+                                <div class="region-card-body">
+                                    <div class="region-icon lg"><i class="fas fa-umbrella-beach"></i></div>
+                                    <h4>제주</h4>
+                                    <p class="region-count">6건</p>
+                                    <span class="region-avg">평균 <strong>5.5억</strong></span>
+                                    <span class="region-trend up"><i class="fas fa-arrow-up"></i> +1.1%</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Map property info popup -->
+                    <div class="map-info-popup" id="map-info-popup">
+                        <div class="popup-header">
+                            <h4 id="popup-region-name">서울특별시</h4>
+                            <button class="popup-close" id="popup-close"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="popup-stats">
+                            <div class="popup-stat">
+                                <span class="popup-stat-label">분양 현장</span>
+                                <span class="popup-stat-value" id="popup-count">127건</span>
+                            </div>
+                            <div class="popup-stat">
+                                <span class="popup-stat-label">평균 시세</span>
+                                <span class="popup-stat-value" id="popup-avg">12.5억</span>
+                            </div>
+                            <div class="popup-stat">
+                                <span class="popup-stat-label">전월 대비</span>
+                                <span class="popup-stat-value trend-up" id="popup-trend"><i class="fas fa-arrow-up"></i>
+                                    +2.3%</span>
+                            </div>
+                        </div>
+                        <div class="popup-properties" id="popup-properties">
+                            <!-- dynamically populated -->
+                        </div>
+                        <button class="popup-view-all">전체 매물 보기 <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+
+                <!-- Right: Detailed Filters -->
+                <div class="filter-panel">
+                    <div class="filter-header">
+                        <h3><i class="fas fa-sliders-h"></i> 상세 필터</h3>
+                        <button class="filter-reset" id="filter-reset"><i class="fas fa-redo-alt"></i> 초기화</button>
+                    </div>
+
+                    <!-- Area Filter -->
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="fas fa-ruler-combined"></i> 면적 (전용면적)
+                        </label>
+                        <div class="range-slider-container">
+                            <div class="range-labels">
+                                <span id="area-min-label">20㎡</span>
+                                <span id="area-max-label">200㎡</span>
+                            </div>
+                            <div class="dual-range" id="area-range">
+                                <div class="range-track">
+                                    <div class="range-fill" id="area-fill"></div>
+                                </div>
+                                <input type="range" min="20" max="200" value="20" class="range-min" id="area-min">
+                                <input type="range" min="20" max="200" value="200" class="range-max" id="area-max">
+                            </div>
+                            <div class="range-presets">
+                                <button class="preset-btn" data-min="20" data-max="59">소형</button>
+                                <button class="preset-btn active" data-min="59" data-max="85">중형</button>
+                                <button class="preset-btn" data-min="85" data-max="135">중대형</button>
+                                <button class="preset-btn" data-min="135" data-max="200">대형</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Price Filter -->
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="fas fa-won-sign"></i> 가격대 (분양가)
+                        </label>
+                        <div class="range-slider-container">
+                            <div class="range-labels">
+                                <span id="price-min-label">1억</span>
+                                <span id="price-max-label">50억</span>
+                            </div>
+                            <div class="dual-range" id="price-range">
+                                <div class="range-track">
+                                    <div class="range-fill" id="price-fill"></div>
+                                </div>
+                                <input type="range" min="1" max="50" value="1" class="range-min" id="price-min">
+                                <input type="range" min="1" max="50" value="50" class="range-max" id="price-max">
+                            </div>
+                            <div class="range-presets">
+                                <button class="preset-btn" data-min="1" data-max="5">5억 이하</button>
+                                <button class="preset-btn" data-min="5" data-max="10">5~10억</button>
+                                <button class="preset-btn" data-min="10" data-max="20">10~20억</button>
+                                <button class="preset-btn" data-min="20" data-max="50">20억+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Unit Count Filter -->
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="fas fa-building"></i> 세대수
+                        </label>
+                        <div class="checkbox-grid">
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="units" value="small">
+                                <span class="checkmark"></span>
+                                <span class="checkbox-text">300세대 미만</span>
+                            </label>
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="units" value="medium" checked>
+                                <span class="checkmark"></span>
+                                <span class="checkbox-text">300~1,000</span>
+                            </label>
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="units" value="large">
+                                <span class="checkmark"></span>
+                                <span class="checkbox-text">1,000~3,000</span>
+                            </label>
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="units" value="mega">
+                                <span class="checkmark"></span>
+                                <span class="checkbox-text">3,000세대+</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Brand Filter -->
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="fas fa-award"></i> 브랜드
+                        </label>
+                        <div class="brand-grid">
+                            <button class="brand-chip active" data-brand="all">전체</button>
+                            <button class="brand-chip" data-brand="samsung">래미안</button>
+                            <button class="brand-chip" data-brand="hyundai">힐스테이트</button>
+                            <button class="brand-chip" data-brand="daewoo">푸르지오</button>
+                            <button class="brand-chip" data-brand="gs">자이</button>
+                            <button class="brand-chip" data-brand="lotte">롯데캐슬</button>
+                            <button class="brand-chip" data-brand="posco">더샵</button>
+                            <button class="brand-chip" data-brand="sk">SK VIEW</button>
+                            <button class="brand-chip" data-brand="dh">디에이치</button>
+                            <button class="brand-chip" data-brand="e">e편한세상</button>
+                            <button class="brand-chip" data-brand="acro">아크로</button>
+                            <button class="brand-chip" data-brand="other">기타</button>
+                        </div>
+                    </div>
+
+                    <!-- Move-In Date Filter -->
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="fas fa-calendar-alt"></i> 입주 예정일
+                        </label>
+                        <div class="date-filter">
+                            <div class="date-options">
+                                <button class="date-btn active" data-period="all">전체</button>
+                                <button class="date-btn" data-period="6m">6개월 이내</button>
+                                <button class="date-btn" data-period="1y">1년 이내</button>
+                                <button class="date-btn" data-period="2y">2년 이내</button>
+                                <button class="date-btn" data-period="3y">3년 이내</button>
+                            </div>
+                            <div class="date-custom">
+                                <div class="date-input-wrap">
+                                    <label>시작일</label>
+                                    <input type="month" id="date-from" value="2026-03">
+                                </div>
+                                <span class="date-separator">~</span>
+                                <div class="date-input-wrap">
+                                    <label>종료일</label>
+                                    <input type="month" id="date-to" value="2029-12">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Apply Filters Button -->
+                    <div class="filter-actions">
+                        <div class="active-filters-count">
+                            <span id="filter-count">3</span>개 필터 적용됨
+                        </div>
+                        <button class="btn-apply-filter">
+                            <i class="fas fa-search"></i> 필터 적용하기
+                            <span class="result-count" id="result-count">385건</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Property Detail Modal -->
+    <div class="modal-overlay" id="property-modal">
+        <div class="modal-container">
+            <button class="modal-close" id="modal-close"><i class="fas fa-times"></i></button>
+            <div class="modal-gallery">
+                <img id="modal-main-img"
+                    src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&fit=crop" alt="매물 이미지">
+                <div class="modal-gallery-thumbs" id="modal-thumbs"></div>
+            </div>
+            <div class="modal-body">
+                <div class="modal-header-info">
+                    <div>
+                        <span class="modal-brand-tag" id="modal-brand">래미안</span>
+                        <span class="modal-status-tag" id="modal-status">분양중</span>
+                    </div>
+                    <h2 id="modal-title">래미안 원펜타스</h2>
+                    <p class="modal-location" id="modal-location"><i class="fas fa-map-marker-alt"></i> 서울 강남구 반포동</p>
+                </div>
+                <div class="modal-price-box">
+                    <div class="price-item"><span class="price-label">분양가</span><span class="price-value"
+                            id="modal-price">35억</span></div>
+                    <div class="price-item"><span class="price-label">3.3㎡당</span><span class="price-value"
+                            id="modal-pyeong">6,850만</span></div>
+                    <div class="price-item"><span class="price-label">전용면적</span><span class="price-value"
+                            id="modal-area">84㎡</span></div>
+                </div>
+                <!-- Detail Tabs -->
+                <div class="modal-tabs">
+                    <button class="modal-tab active" data-tab="floorplan"><i class="fas fa-drafting-compass"></i>
+                        평면도</button>
+                    <button class="modal-tab" data-tab="complex"><i class="fas fa-sitemap"></i> 단지 배치</button>
+                    <button class="modal-tab" data-tab="community"><i class="fas fa-swimming-pool"></i> 커뮤니티</button>
+                    <button class="modal-tab" data-tab="info"><i class="fas fa-info-circle"></i> 상세정보</button>
+                </div>
+                <div class="modal-tab-content active" id="tab-floorplan">
+                    <div class="floorplan-grid">
+                        <div class="floorplan-card active" data-type="59A"><span>59A</span><small>방2/욕실1</small></div>
+                        <div class="floorplan-card" data-type="84A"><span>84A</span><small>방3/욕실2</small></div>
+                        <div class="floorplan-card" data-type="84B"><span>84B</span><small>방3/욕실2</small></div>
+                        <div class="floorplan-card" data-type="114"><span>114</span><small>방4/욕실2</small></div>
+                    </div>
+                    <div class="floorplan-view"><img
+                            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&fit=crop" alt="평면도">
+                    </div>
+                </div>
+                <div class="modal-tab-content" id="tab-complex">
+                    <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&fit=crop" alt="단지 배치도"
+                        style="width:100%;border-radius:12px;">
+                    <div class="complex-info-grid">
+                        <div class="info-chip"><i class="fas fa-home"></i> 총 2,800세대</div>
+                        <div class="info-chip"><i class="fas fa-layer-group"></i> 지하3층~지상35층</div>
+                        <div class="info-chip"><i class="fas fa-car"></i> 세대당 1.5대</div>
+                        <div class="info-chip"><i class="fas fa-calendar"></i> 2028년 3월 입주</div>
+                    </div>
+                </div>
+                <div class="modal-tab-content" id="tab-community">
+                    <div class="community-grid">
+                        <div class="community-item">
+                            <div class="community-icon"><i class="fas fa-swimming-pool"></i></div><span>인피니티풀</span>
+                        </div>
+                        <div class="community-item">
+                            <div class="community-icon"><i class="fas fa-dumbbell"></i></div><span>피트니스센터</span>
+                        </div>
+                        <div class="community-item">
+                            <div class="community-icon"><i class="fas fa-book-reader"></i></div><span>독서실·스터디</span>
+                        </div>
+                        <div class="community-item">
+                            <div class="community-icon"><i class="fas fa-spa"></i></div><span>사우나·찜질방</span>
+                        </div>
+                        <div class="community-item">
+                            <div class="community-icon"><i class="fas fa-baby"></i></div><span>키즈카페</span>
+                        </div>
+                        <div class="community-item">
+                            <div class="community-icon"><i class="fas fa-golf-ball"></i></div><span>골프연습장</span>
+                        </div>
+                        <div class="community-item">
+                            <div class="community-icon"><i class="fas fa-film"></i></div><span>영화관</span>
+                        </div>
+                        <div class="community-item">
+                            <div class="community-icon"><i class="fas fa-couch"></i></div><span>게스트하우스</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-tab-content" id="tab-info">
+                    <table class="info-table">
+                        <tr>
+                            <td>시행사</td>
+                            <td id="modal-developer">삼성물산</td>
+                        </tr>
+                        <tr>
+                            <td>시공사</td>
+                            <td id="modal-builder">삼성물산 건설부문</td>
+                        </tr>
+                        <tr>
+                            <td>청약일</td>
+                            <td id="modal-apply-date">2026.04.15</td>
+                        </tr>
+                        <tr>
+                            <td>당첨발표</td>
+                            <td id="modal-result-date">2026.04.22</td>
+                        </tr>
+                        <tr>
+                            <td>입주예정</td>
+                            <td id="modal-movein">2028년 3월</td>
+                        </tr>
+                        <tr>
+                            <td>총 세대수</td>
+                            <td>2,800세대 / 18개동</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-modal-alarm"><i class="fas fa-bell"></i> 청약 알림 설정</button>
+                    <button class="btn-modal-inquiry"><i class="fas fa-headset"></i> 상담 신청</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Property Guide Section -->
+    <section class="guide-section" id="guide-section">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-book"></i> 분양 가이드</span>
+                <h2 class="section-title">처음이라도 괜찮아요<br><span class="highlight">심플한 분양 가이드</span></h2>
+            </div>
+            <div class="guide-grid">
+                <div class="guide-card">
+                    <div class="guide-icon"><i class="fas fa-search-dollar"></i></div>
+                    <h4>1. 예산 세우기</h4>
+                    <p>주택담보대출 LTV, DSR을 고려하여 현실적인 자금 계획을 세우는 것이 첫걸음입니다.</p>
+                </div>
+                <div class="guide-card">
+                    <div class="guide-icon"><i class="fas fa-clipboard-check"></i></div>
+                    <h4>2. 청약 자격 확인</h4>
+                    <p>무주택 기간, 부양가족 수, 청약통장 가입 기간 등 본인의 가점을 미리 확인하세요.</p>
+                </div>
+                <div class="guide-card">
+                    <div class="guide-icon"><i class="fas fa-keyboard"></i></div>
+                    <h4>3. 청약 신청</h4>
+                    <p>청약홈 사이트를 통해 원하는 단지의 일정에 맞춰 온라인으로 간편하게 신청합니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+
+
+    <!-- Quick Navigation (Top/Bottom) -->
+    <div class="scroll-nav" id="scroll-nav">
+        <button class="scroll-btn" id="scroll-top" title="맨 위로 가기">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+        <div class="scroll-nav-divider"></div>
+        <button class="scroll-btn" id="scroll-bottom" title="맨 아래로 가기">
+            <i class="fas fa-arrow-down"></i>
+        </button>
+    </div>
+
+    <!-- Floating Action Button (FAB) -->
+    <div class="fab-container" id="fab-container">
+        <div class="fab-menu" id="fab-menu">
+            <button class="fab-item" id="fab-chat" title="채팅 상담 시작">
+                <i class="fas fa-comments"></i>
+                <span>채팅 상담</span>
+            </button>
+            <button class="fab-item" id="fab-visit" title="방문/상담 예약">
+                <i class="fas fa-calendar-check"></i>
+                <span>상담 예약</span>
+            </button>
+        </div>
+        <button class="fab-trigger" id="fab-trigger">
+            <i class="fas fa-headset"></i>
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- Consultation Modal -->
+    <div class="modal-overlay consult-modal" id="consult-modal">
+        <div class="consult-container">
+            <button class="modal-close" id="consult-close"><i class="fas fa-times"></i></button>
+            <h2><i class="fas fa-headset"></i> 스마트 상담 센터</h2>
+            <div class="consult-tabs">
+                <button class="consult-tab active" data-ctab="chat"><i class="fas fa-comments"></i> 1:1 채팅 상담</button>
+                <button class="consult-tab" data-ctab="visit"><i class="fas fa-calendar-check"></i> 상담/방문 예약</button>
+            </div>
+            <div class="consult-content active" id="ctab-chat">
+                <div class="chat-preview">
+                    <div class="chat-bubble bot"><span>안녕하세요! '공 간' 스마트 상담 센터입니다. 😊<br>채팅을 통해 실시간으로 무엇이든 물어보세요.</span></div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" placeholder="문의하실 내용을 입력하세요..." id="chat-input">
+                    <button class="chat-send-btn"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+
+            <div class="consult-content" id="ctab-visit">
+                <form class="consult-form" id="visit-form">
+                    <div class="form-group">
+                        <label>이름</label>
+                        <input type="text" id="visit-name" placeholder="홍길동" required>
+                    </div>
+                    <div class="form-group">
+                        <label>연락처</label>
+                        <input type="tel" id="visit-phone" placeholder="010-0000-0000" required>
+                    </div>
+                    <div class="form-group">
+                        <label>방문 희망 현장</label>
+                        <select id="visit-site">
+                            <option>래미안 원펜타스 모델하우스</option>
+                            <option>힐스테이트 판교역 홍보관</option>
+                            <option>디에이치 아너힐즈 견본주택</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>희망 날짜</label>
+                            <input type="date" id="visit-date" value="2026-03-20" required>
+                        </div>
+                        <div class="form-group">
+                            <label>희망 시간</label>
+                            <select id="visit-time">
+                                <option>10:00</option>
+                                <option>11:00</option>
+                                <option>13:00</option>
+                                <option>14:00</option>
+                                <option>15:00</option>
+                                <option>16:00</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>요청 사항</label>
+                        <textarea id="visit-memo" placeholder="추가 요청 사항이 있으시면 적어주세요."></textarea>
+                    </div>
+                    <button type="submit" class="btn-consult-submit"><i class="fas fa-calendar-check"></i> 방문 예약
+                        신청</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div class="modal-overlay share-modal" id="share-modal">
+        <div class="share-container">
+            <button class="modal-close" id="share-close"><i class="fas fa-times"></i></button>
+            <h3><i class="fas fa-share-alt"></i> 매물 공유하기</h3>
+            <p class="share-property-name" id="share-property-name">래미안 원펜타스</p>
+            <div class="share-options">
+                <button class="share-btn kakao" id="share-kakao">
+                    <div class="share-icon-wrap kakao-bg"><i class="fas fa-comment"></i></div>
+                    <span>카카오톡</span>
+                </button>
+                <button class="share-btn" id="share-url">
+                    <div class="share-icon-wrap"><i class="fas fa-link"></i></div>
+                    <span>URL 복사</span>
+                </button>
+                <button class="share-btn" id="share-sms">
+                    <div class="share-icon-wrap"><i class="fas fa-sms"></i></div>
+                    <span>문자 전송</span>
+                </button>
+                <button class="share-btn" id="share-email">
+                    <div class="share-icon-wrap"><i class="fas fa-envelope"></i></div>
+                    <span>이메일</span>
+                </button>
+            </div>
+            <div class="share-url-box">
+                <input type="text" value="https://gonggan.kr/property/raemian-wonpentas" id="share-url-input" readonly>
+                <button class="btn-copy-url" id="btn-copy-url"><i class="fas fa-copy"></i> 복사</button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Calendar Sidebar -->
+    <div class="side-panel" id="calendar-sidebar">
+        <div class="sidebar-header">
+            <h3><i class="fas fa-calendar-alt"></i> 내 캘린더</h3>
+            <button class="sidebar-close" id="calendar-close"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div class="sidebar-calendar-wrap">
+            <div id="calendar-ui" class="calendar-ui-container">
+                <!-- JS handles this -->
+            </div>
+        </div>
+
+        <div class="calendar-event-section">
+            <div class="section-title-row">
+                <h4>오늘의 일정</h4>
+                <button class="btn-add-event" id="btn-add-event"><i class="fas fa-plus"></i> 일정 추가</button>
+            </div>
+
+            <div class="event-add-form" id="event-add-form" style="display:none;">
+                <input type="text" id="event-title-input" placeholder="일정 이름 (예: 모델하우스 방문)">
+                <div class="event-form-row">
+                    <input type="text" id="event-time-input" placeholder="시간 (예: 14:00)">
+                    <button class="btn-event-save" id="btn-event-save">저장</button>
+                </div>
+            </div>
+
+            <div id="calendar-list" class="sidebar-list">
+                <!-- Events -->
+            </div>
+        </div>
+    </div>
+
+    <!-- All Properties Modal -->
+    <div class="modal-overlay" id="all-properties-modal">
+        <div class="all-props-container">
+            <div class="all-props-header">
+                <div>
+                    <h2 id="all-props-title">전체 매물 보기</h2>
+                    <p id="all-props-subtitle">해당 지역의 모든 분양 현장을 확인하세요.</p>
+                </div>
+                <div class="all-props-controls">
+                    <select id="all-props-sort" class="props-sort-select">
+                        <option value="high">가격 높은 순</option>
+                        <option value="low">가격 낮은 순</option>
+                    </select>
+                    <button class="all-props-close-btn" id="all-props-close"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <div class="all-props-grid" id="all-props-grid">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Expert Detail Modal -->
+    <div class="modal-overlay" id="expert-modal">
+        <div class="modal-container expert-modal-container">
+            <button class="modal-close" id="expert-modal-close"><i class="fas fa-times"></i></button>
+            <div class="expert-modal-content">
+                <div class="expert-modal-left">
+                    <img id="expert-modal-img" src="" alt="전문가 이미지">
+                </div>
+                <div class="expert-modal-right">
+                    <span class="expert-modal-tag" id="expert-modal-tag">분야</span>
+                    <h2 id="expert-modal-name">이름 <small id="expert-modal-role">직함</small></h2>
+                    <div class="expert-modal-bio" id="expert-modal-bio">
+                        <!-- Detailed bio goes here -->
+                    </div>
+                    <div class="expert-modal-specialties" id="expert-modal-specialties">
+                        <!-- Specialty tags -->
+                    </div>
+                    <div class="expert-modal-actions">
+                        <button class="btn-expert-contact"><i class="fas fa-envelope"></i> 전문가에게 문의하기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Company About Modal -->
+    <div class="modal-overlay" id="about-modal">
+        <div class="about-modal-container">
+            <button class="modal-close" id="about-modal-close"><i class="fas fa-times"></i></button>
+            <div class="about-modal-header">
+                <span class="section-badge"><i class="fas fa-info-circle"></i> ABOUT US</span>
+                <h2 class="section-title">가치 있는 삶의 시작,<br><span class="highlight">전문 그룹 '공 간'</span></h2>
+            </div>
+            <div class="about-card-wide">
+                <div class="about-text">
+                    <h3>우리가 만드는 '공 간'의 철학</h3>
+                    <p>'공 간'은 단순한 부동산 중개를 넘어, 고객의 삶이 담길 공간의 본질과 가치를 탐구하는 전문 그룹입니다. 우리는 모든 고객이 자신만의 완벽한 휴식처와 자산 가치를 동시에 확보할 수 있도록 돕습니다.</p>
+                    <div class="about-features">
+                        <div class="about-feature-item">
+                            <i class="fas fa-chart-line"></i>
+                            <div>
+                                <h4>데이터 기반 분석</h4>
+                                <p>전국 분양 트렌드와 미래 가치를 수치로 증명합니다.</p>
+                            </div>
+                        </div>
+                        <div class="about-feature-item">
+                            <i class="fas fa-user-shield"></i>
+                            <div>
+                                <h4>전문가 밀착 케어</h4>
+                                <p>세무, 법률, 금융 전문가가 리스크 없는 계약을 보장합니다.</p>
+                            </div>
+                        </div>
+                        <div class="about-feature-item">
+                            <i class="fas fa-paint-roller"></i>
+                            <div>
+                                <h4>공간 큐레이션</h4>
+                                <p>라이프스타일에 맞춘 프리미엄 인테리어 솔루션을 제안합니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&h=600&fit=crop" alt="Company Philosophy">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-info">
+                <a href="#" class="footer-logo">공<span>간</span></a>
+                <p class="footer-desc">'공 간'은 전국 각지의 신뢰할 수 있는 분양 정보를 제공하여 당신의 현명한 주관 마련을 돕습니다. 단순한 계약을 넘어 고객의 삶이 담길 공간의 가치를 가장 먼저 생각합니다.</p>
+                <div class="footer-social">
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                    <a href="#"><i class="fab fa-blog"></i></a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>빠른 링크</h4>
+                <ul>
+                    <li><a href="#">전국 분양 정보</a></li>
+                    <li><a href="#" onclick="openAboutModal()">회사 소개</a></li>
+                    <li><a href="#guide-section">분양 가이드</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>상담 센터</h4>
+                <ul>
+                    <li><a href="#" onclick="openConsultModal('chat')">1:1 채팅 상담</a></li>
+                    <li><a href="#" onclick="openConsultModal('visit')">모델하우스 방문 예약</a></li>
+                    <li><a href="inquiry.html">분양 광고 문의</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="nav-container">
+                <p>&copy; 2026 공 간. All rights reserved.</p>
+                <div style="display: flex; gap: 20px;">
+                    <a href="#">이용약관</a>
+                    <a href="#">개인정보처리방침</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
