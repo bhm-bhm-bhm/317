@@ -2802,9 +2802,48 @@ button {
 .property-list-section .section-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: center; /* Changed from flex-end to center */
     text-align: left;
     margin-bottom: 50px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.property-region-tabs {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.property-region-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.region-tab-btn {
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 30px;
+    color: var(--color-text-muted);
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: var(--transition-smooth);
+}
+
+.region-tab-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.region-tab-btn.active {
+    background: var(--color-primary);
+    color: #fff;
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 15px rgba(176, 141, 106, 0.3);
 }
 
 .header-left .section-title {

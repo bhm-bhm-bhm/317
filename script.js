@@ -894,6 +894,50 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentRegionKey = 'seoul';
     let isExpanded = false;
 
+    // Helper to get properties for a region, including mock data if needed
+    function getPropertiesForRegion(regionKey) {
+        const data = regionData[regionKey];
+        if (!data) return [];
+
+        let props = [...data.properties];
+        
+        // If properties are empty or less than a minimum count, fill with mock data for demo
+        const minCount = 8; 
+        const totalToDisplay = Math.max(minCount, parseInt(data.count) || 0);
+        const displayLimit = Math.min(totalToDisplay, 24); // Cap at 24 for UI
+
+        const mockBrands = ['래미안', '힐스테이트', '푸르지오', '자이', '롯데캐슬', '더샵', '아이파크', 'e편한세상'];
+        const mockCategories = ['아파트', '오피스텔', '주상복합', '도시형생활주택'];
+        const mockImages = [
+            'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00',
+            'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab',
+            'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2',
+            'https://images.unsplash.com/photo-1512917774080-9991f1c4c750',
+            'https://images.unsplash.com/photo-1580587771525-78b9dba3b914',
+            'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e',
+            'https://images.unsplash.com/photo-1564013799919-ab600027ffc6',
+            'https://images.unsplash.com/photo-1570129477492-45c003edd2be'
+        ];
+
+        for (let i = props.length; i < displayLimit; i++) {
+            const brand = mockBrands[i % mockBrands.length];
+            const category = mockCategories[Math.floor(Math.random() * mockCategories.length)];
+            const priceNum = (Math.floor(Math.random() * 20) + 5);
+            
+            props.push({
+                name: `${brand} ${data.name} 센트럴 ${i+1}`,
+                category: category,
+                area: `${data.name} 중심상업지구 ${i+1}번길`,
+                price: priceNum + '억',
+                img: `${mockImages[i % mockImages.length]}?w=400&h=300&fit=crop`,
+                brand: brand,
+                status: i % 3 === 0 ? '청약중' : '분양중',
+                isMock: true
+            });
+        }
+        return props;
+    }
+
     function renderMainPropertyList(regionKey, scrollTo = false, expanded = false) {
         const grid = document.getElementById('main-property-grid');
         const loadMoreBtn = document.querySelector('.btn-load-more');
@@ -905,8 +949,12 @@ document.addEventListener('DOMContentLoaded', () => {
         isExpanded = expanded;
         document.getElementById('selected-region-name').textContent = data.name;
 
-        // If not expanded, show only first 4. If expanded, or if global search results, show all.
-        // For search results (handled in handleHeroSearch), we'll handle separately or unify.
+        // Sync Region Tabs UI
+        document.querySelectorAll('.region-tab-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.region === regionKey);
+        });
+
+        const props = getPropertiesForRegion(regionKey);
         
         // Let's unify with a helper
         const renderCards = (props, targetGrid) => {
@@ -962,7 +1010,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
             setTimeout(() => {
-                renderCards(data.properties, grid);
+                renderCards(props, grid);
                 if(scrollTo) {
                     window.scrollTo({
                         top: document.getElementById('property-list-section').offsetTop - 100,
@@ -971,7 +1019,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }, 600);
         } else {
-            renderCards(data.properties, grid);
+            renderCards(props, grid);
         }
     }
 
@@ -998,6 +1046,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     };
+
+    // Region Tab Button Click Listeners
+    document.querySelectorAll('.region-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const region = btn.dataset.region;
+            renderMainPropertyList(region, true);
+        });
+    });
 
     // Init
     renderCalendarUI();
