@@ -1,4 +1,24 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Typing Effect
+    const typingText = document.getElementById('typing-text');
+    const fullText = "현명한 선택을 위해";
+    let index = 0;
+
+    function typeEffect() {
+        if (index < fullText.length) {
+            typingText.textContent += fullText[index];
+            index++;
+            setTimeout(typeEffect, 120); // Typing speed
+        } else {
+            // Typing finished
+            setTimeout(() => {
+                const cursor = document.querySelector('.typing-cursor');
+                if (cursor) cursor.style.display = 'none';
+            }, 1000);
+        }
+    }
+    
+    setTimeout(typeEffect, 800); // Start delay after hero fade-up
     // ==========================================
     // HERO SECTION
     // ==========================================
@@ -50,22 +70,23 @@ document.addEventListener('DOMContentLoaded', () => {
             // Search across all regions and properties
             Object.entries(regionData).forEach(([regionKey, data]) => {
                 const regionName = data.name.toLowerCase();
+                const regionProps = getPropertiesForRegion(regionKey); // Use expanded list with mocks
                 
-                // If region name matches, add all properties from that region
-                if (regionName.includes(query)) {
-                    data.properties.forEach((prop, idx) => {
-                        searchResults.push({ ...prop, regionKey, propIndex: idx });
+                // If region name matches (e.g., "광주" matches "광주광역시")
+                if (regionName.includes(query) || query.includes(regionName.replace(/(광역시|특별자치시|도|시)$/, ''))) {
+                    regionProps.forEach((prop) => {
+                        searchResults.push({ ...prop, regionKey });
                     });
                 } else {
-                    // Otherwise, check individual properties
-                    data.properties.forEach((prop, idx) => {
+                    // Otherwise, check individual properties in this region
+                    regionProps.forEach((prop) => {
                         if (
                             prop.name.toLowerCase().includes(query) ||
                             prop.category.toLowerCase().includes(query) ||
                             prop.area.toLowerCase().includes(query) ||
                             (prop.brand && prop.brand.toLowerCase().includes(query))
                         ) {
-                            searchResults.push({ ...prop, regionKey, propIndex: idx });
+                            searchResults.push({ ...prop, regionKey });
                         }
                     });
                 }
@@ -77,22 +98,28 @@ document.addEventListener('DOMContentLoaded', () => {
             if (searchResults.length === 0) {
                 grid.innerHTML = `
                     <div style="grid-column: 1/-1; text-align: center; padding: 100px 20px;">
-                        <i class="fas fa-search-minus" style="font-size: 40px; color: #444; margin-bottom: 20px;"></i>
-                        <p style="color: #888; font-size: 16px;">'${query}'에 대한 검색 결과가 없습니다.</p>
-                        <p style="color: #666; font-size: 14px; margin-top: 10px;">다른 키워드로 검색하거나 지도에서 지역을 선택해보세요.</p>
+                        <i class="fas fa-search-minus" style="font-size: 50px; color: var(--color-primary); opacity: 0.3; margin-bottom: 24px;"></i>
+                        <p style="color: #fff; font-size: 18px; font-weight: 600;">'${query}'에 대한 검색 결과가 없습니다.</p>
+                        <p style="color: var(--color-text-muted); font-size: 14px; margin-top: 12px; line-height: 1.6;">
+                            지역명을 다시 확인하시거나 (예: 서울, 부산, 경기)<br>
+                            아파트, 오피스텔 등 카테고리로 검색해보세요.
+                        </p>
                     </div>
                 `;
                 return;
             }
 
-            searchResults.forEach((prop) => {
+            // Remove duplicates (if any) and render
+            const uniqueResults = searchResults.filter((v, i, a) => a.findIndex(t => (t.name === v.name)) === i);
+
+            uniqueResults.forEach((prop) => {
                 const card = document.createElement('div');
-                card.className = 'all-prop-card';
+                card.className = 'all-prop-card fade-in';
                 card.onclick = () => openPropertyModal(prop.regionKey, prop.propIndex);
                 card.innerHTML = `
                     <div class="all-prop-img-wrap">
                         <img src="${prop.img.replace('w=100&h=100', 'w=400&h=300')}" alt="${prop.name}" class="all-prop-img">
-                        <span class="mock-tag">MATCH</span>
+                        <span class="mock-tag">${prop.isMock ? '추천' : 'MATCH'}</span>
                     </div>
                     <div class="all-prop-body">
                         <span class="all-prop-badge">${prop.category}</span>
@@ -188,6 +215,117 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+
+    // ==========================================
+    // FILTER PANEL LOGIC (Range Sliders)
+    // ==========================================
+    function initDualRange(idPrefix, minVal, maxVal) {
+        const minInput = document.getElementById(`${idPrefix}-min`);
+        const maxInput = document.getElementById(`${idPrefix}-max`);
+        const fill = document.getElementById(`${idPrefix}-fill`);
+        const minLabel = document.getElementById(`${idPrefix}-min-label`);
+        const maxLabel = document.getElementById(`${idPrefix}-max-label`);
+        const unit = idPrefix === 'area' ? '㎡' : '억';
+
+        if (!minInput || !maxInput || !fill) return;
+
+        const updateFill = () => {
+            const min = parseFloat(minInput.value);
+            const max = parseFloat(maxInput.value);
+
+            if (min > max) {
+                // Swap or prevent overlap logic
+                if (document.activeElement === minInput) minInput.value = max;
+                else maxInput.value = min;
+            }
+
+            const percent1 = ((minInput.value - minVal) / (maxVal - minVal)) * 100;
+            const percent2 = ((maxInput.value - minVal) / (maxVal - minVal)) * 100;
+
+            fill.style.left = percent1 + "%";
+            fill.style.right = (100 - percent2) + "%";
+
+            if (minLabel) minLabel.textContent = minInput.value + unit;
+            if (maxLabel) maxLabel.textContent = maxInput.value + unit;
+            
+            // Sync presets
+            document.querySelectorAll(`.filter-group:has(#${idPrefix}-range) .preset-btn`).forEach(btn => {
+                const bMin = btn.dataset.min;
+                const bMax = btn.dataset.max;
+                btn.classList.toggle('active', minInput.value === bMin && maxInput.value === bMax);
+            });
+        };
+
+        minInput.addEventListener('input', updateFill);
+        maxInput.addEventListener('input', updateFill);
+
+        // Preset buttons
+        document.querySelectorAll(`.filter-group:has(#${idPrefix}-range) .preset-btn`).forEach(btn => {
+            btn.addEventListener('click', () => {
+                minInput.value = btn.dataset.min;
+                maxInput.value = btn.dataset.max;
+                updateFill();
+            });
+        });
+
+        updateFill(); // Initial sync
+    }
+
+    initDualRange('area', 20, 200);
+    initDualRange('price', 1, 50);
+
+    // Initial storage for update functions
+    window.updateFilters = {
+        area: () => {}, // placeholder, filled by initDualRange if needed or just call updateFill manually
+        price: () => {}
+    };
+
+    // Filter Reset Logic
+    document.getElementById('filter-reset')?.addEventListener('click', () => {
+        // Set everything to values requested by USER
+        const areaMin = document.getElementById('area-min');
+        const areaMax = document.getElementById('area-max');
+        const priceMin = document.getElementById('price-min');
+        const priceMax = document.getElementById('price-max');
+
+        if(areaMin) areaMin.value = 20;
+        if(areaMax) areaMax.value = 20;
+        if(priceMin) priceMin.value = 1;
+        if(priceMax) priceMax.value = 1;
+
+        // Trigger updates (simulating input events for UI sync)
+        areaMin?.dispatchEvent(new Event('input'));
+        priceMin?.dispatchEvent(new Event('input'));
+
+        // Unit Counts: Only "small" (under 300) checked
+        document.querySelectorAll('.filter-group input[name="units"]').forEach(cb => {
+            cb.checked = (cb.value === 'small');
+        });
+
+        // Other generic checkboxes (if any)
+        document.querySelectorAll('.filter-group input[type="checkbox"]:not([name="units"])').forEach(cb => {
+            cb.checked = false;
+        });
+
+        // Brand chips: Reset to "all"
+        document.querySelectorAll('.brand-chip').forEach(chip => {
+            chip.classList.toggle('active', chip.dataset.brand === 'all');
+        });
+
+        // Date buttons: Reset to "all"
+        document.querySelectorAll('.date-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.period === 'all');
+        });
+
+        showToast('필터가 요청하신 기본값으로 초기화되었습니다.');
+    });
+
+    // Apply Filters Notification
+    document.querySelector('.btn-apply-filter')?.addEventListener('click', () => {
+        const count = Math.floor(Math.random() * 50) + 10;
+        showToast(`필터가 적용되었습니다. 주위 ${count}개의 검색 결과가 반영되었습니다.`);
+        document.getElementById('result-count').textContent = count + '건';
+    });
 
     // Map View Switch Logic
     const mapTabs = document.querySelectorAll('.map-tab');
@@ -450,7 +588,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         // Combine real and mock properties
-        let displayList = [...data.properties];
+        let displayList = data.properties.map((p, i) => ({ ...p, regionKey, propIndex: i }));
         
         // Fill up to the totalCount (or a reasonable limit for demo, e.g., 20) with mock data
         const displayLimit = Math.min(totalCount, 24); 
@@ -469,7 +607,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 img: `${mockImages[i % mockImages.length]}?w=400&h=300&fit=crop`,
                 brand: brand,
                 status: '분양중',
-                isMock: true
+                isMock: true,
+                regionKey: regionKey,
+                propIndex: -1
             });
         }
 
@@ -486,11 +626,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const card = document.createElement('div');
                 card.className = 'all-prop-card';
                 card.onclick = () => {
-                    if (prop.isMock) {
+                    if (prop.isMock || prop.propIndex === -1) {
                         showToast(`상세 정보 준비 중입니다. (${prop.name})`);
                     } else {
                         allPropsModal.classList.remove('show');
-                        openPropertyModal(regionKey, idx);
+                        openPropertyModal(prop.regionKey || regionKey, prop.propIndex);
                     }
                 };
                 card.innerHTML = `
@@ -530,6 +670,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     const modal = document.getElementById('property-modal');
     window.openPropertyModal = function(regionKey, propIndex) {
+        if (propIndex === -1) {
+            showToast('상세 정보 준비 중입니다. 곧 업데이트될 예정입니다!');
+            return;
+        }
         const data = regionData[regionKey];
         if (!data || !data.properties[propIndex]) return;
         const prop = data.properties[propIndex];
@@ -745,7 +889,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('fab-visit')?.addEventListener('click', () => { fabContainer?.classList.remove('open'); openConsultModal('visit'); });
 
     // ==========================================
-    // CONSULTATION
+    // CONSULTATION (Chat Only)
     // ==========================================
     const consultModal = document.getElementById('consult-modal');
     window.openConsultModal = function(tab = 'chat') {
@@ -760,9 +904,9 @@ document.addEventListener('DOMContentLoaded', () => {
         tab.addEventListener('click', () => openConsultModal(tab.dataset.ctab));
     });
 
-    // Chat
+    // Chat Logic
     const chatInput = document.getElementById('chat-input');
-    document.querySelector('.chat-send-btn')?.addEventListener('click', () => {
+    const sendChat = () => {
         const text = chatInput?.value.trim();
         if (!text) return;
         const preview = document.querySelector('.chat-preview');
@@ -770,36 +914,39 @@ document.addEventListener('DOMContentLoaded', () => {
             preview.innerHTML += `<div class="chat-bubble user"><span>${text}</span></div>`;
             chatInput.value = '';
             setTimeout(() => {
-                let response = `감사합니다! "${text}"에 대해 '공 간' 전문 상담 센터에서 분석 중입니다. 상세한 상담을 위해 '분양 광고 문의' 페이지를 이용하시거나 상담 예약을 남겨주시면 감사하겠습니다. 😊`;
+                let response = `감사합니다! "${text}"에 대해 '공 간' 전문 상담 센터에서 분석 중입니다. 상세한 상담을 원하시면 언제든 문의를 남겨주세요. 😊`;
                 if (text.includes('가격') || text.includes('분양가')) {
-                    response = "현재 분양가는 타입별로 상이하며 평당가 기준 약 6,000만원대부터 형성되어 있습니다. 자세한 상담을 원하시면 연락처를 남겨주세요!";
+                    response = "현재 주요 단지들의 분양가는 평당 6,000만원대부터 형성되어 있습니다. 상세 견적은 전담 상담사를 통해 안내해 드리겠습니다.";
                 } else if (text.includes('위치')) {
-                    response = "해당 단지들은 생활 인프라가 완비된 핵심 입지에 위치해 있습니다. 모델하우스 방문 예약을 통해 직접 확인해 보시는 건 어떨까요?";
+                    response = "핵심 입지의 단지 정보를 실시간으로 분석해 드립니다. 원하시는 지역이 있으신가요?";
                 }
                 preview.innerHTML += `<div class="chat-bubble bot"><span>${response}</span></div>`;
                 preview.scrollTop = preview.scrollHeight;
-            }, 1000);
+            }, 800);
         }
-    });
+    };
+    document.querySelector('.chat-send-btn')?.addEventListener('click', sendChat);
+    chatInput?.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChat(); });
 
     document.getElementById('visit-form')?.addEventListener('submit', (e) => {
         e.preventDefault();
         const name = document.getElementById('visit-name').value;
-        const site = document.getElementById('visit-site').value;
         const date = document.getElementById('visit-date').value;
         const time = document.getElementById('visit-time').value;
         
-        // Proactive: Add to calendar
-        calendarEvents.push({
-            id: Date.now(),
-            name: `[방문예약] ${site}`,
-            type: time,
-            date: new Date(date).toISOString()
-        });
-        saveCalendar();
+        // Add to calendar
+        if (typeof calendarEvents !== 'undefined') {
+            calendarEvents.push({
+                id: Date.now(),
+                name: `[상담] ${name}님`,
+                type: time,
+                date: new Date(date).toISOString()
+            });
+            if (typeof saveCalendar === 'function') saveCalendar();
+        }
         
         consultModal?.classList.remove('show');
-        showToast(`✅ ${name}님, ${site} 방문 예약이 접수되어 캘린더에 등록되었습니다! (${date} ${time})`);
+        showToast(`✅ ${name}님, 상담예약이 접수되었습니다! (${date} ${time})`);
     });
 
     // Experts Data
@@ -866,6 +1013,23 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.btn-contact').forEach(btn => {
         btn.addEventListener('click', () => { window.location.href = 'inquiry.html'; });
     });
+    document.querySelectorAll('.btn-expert-contact').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const expertName = document.getElementById('expert-modal-name').textContent.split(' ')[0];
+            document.getElementById('expert-modal').classList.remove('show');
+            
+            // Open Consultation Modal and pre-fill
+            openConsultModal('chat');
+            const memoEl = document.getElementById('visit-memo');
+            if (memoEl) {
+                memoEl.value = `[${expertName} 전문가 전담 상담 요청] \n문의 내용: `;
+                memoEl.focus();
+            }
+            
+            showToast(`${expertName} 전문가 상담 예약 화면으로 연결되었습니다.`);
+        });
+    });
+
     document.querySelectorAll('.btn-modal-inquiry').forEach(btn => {
         btn.addEventListener('click', () => { openConsultModal('chat'); });
     });
@@ -905,12 +1069,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = regionData[regionKey];
         if (!data) return [];
 
-        let props = [...data.properties];
+        // Add original index and region info to real properties
+        let props = data.properties.map((p, i) => ({ ...p, regionKey, propIndex: i }));
         
-        // If properties are empty or less than a minimum count, fill with mock data for demo
         const minCount = 8; 
         const totalToDisplay = Math.max(minCount, parseInt(data.count) || 0);
-        const displayLimit = Math.min(totalToDisplay, 24); // Cap at 24 for UI
+        const displayLimit = Math.min(totalToDisplay, 24); 
 
         const mockBrands = ['래미안', '힐스테이트', '푸르지오', '자이', '롯데캐슬', '더샵', '아이파크', 'e편한세상'];
         const mockCategories = ['아파트', '오피스텔', '주상복합', '도시형생활주택'];
@@ -938,7 +1102,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 img: `${mockImages[i % mockImages.length]}?w=400&h=300&fit=crop`,
                 brand: brand,
                 status: i % 3 === 0 ? '청약중' : '분양중',
-                isMock: true
+                isMock: true,
+                regionKey: regionKey,
+                propIndex: -1 // Special flag for mock
             });
         }
         return props;
